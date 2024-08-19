@@ -1,40 +1,36 @@
+/* Fetching data from data.json file */
 async function fetchData() {
     try {
 
         const response = await fetch('../../data.json');
-        console.log(response);
         if (response.ok !== false) {
-
             const data = await response.json();
-
-            console.log(data);
-            console.log(data[0]);
-            console.log(data[0].image);
-            console.log(data[0].image.desktop);
-            console.log(typeof data[0].image.desktop);
-
             for (let i in data) {
-                /* 
-                let image = document.createElement('img');
-                image.src = data[i].image.desktop;
-                image.alt = 'product image';
-
-                document.body.appendChild(image);
-                 */
                 createProduct(data, i);
             }
         }
+
+        document.querySelectorAll('.add-to-cart').forEach(el => {
+
+            el.addEventListener('click', () => {
+
+                updateCartElementsNumber();
+                hideEmptyCartElements();
+                createControlQuantityButton(el);
+
+            });
+        });
 
     } catch (error) {
         console.error(error);
     }
 }
-
 fetchData();
 
-/* Selecting items */
-let productsArea = document.querySelector('.products');
+/* Selecting products container */
+const productsArea = document.querySelector('.products');
 
+/* Function that creates the product */
 function createProduct(data, x) {
 
     let product = document.createElement('div');
@@ -78,7 +74,7 @@ function createProduct(data, x) {
 
     let price = document.createElement('p');
     price.className = 'product-price';
-    price.innerText = data[x].price;
+    price.innerText = `$ ${data[x].price}`;
 
     description.appendChild(category);
     description.appendChild(name);
@@ -87,4 +83,85 @@ function createProduct(data, x) {
     product.appendChild(description);
 
     productsArea.appendChild(product);
+    
 }
+
+/* Control quantity dynamically */
+let quantitySpan = document.querySelector('.quantity');
+let totalQuantity = 0;
+quantitySpan.innerText = totalQuantity;
+
+function hideEmptyCartElements() {
+    document.querySelector('.empty-cart-image').classList.add('hidden');
+    document.querySelector('.empty-cart-message').classList.add('hidden');
+
+    document.querySelector('div.carbon-neutral-delivery').classList.remove('hidden');
+        document.querySelector('.confirm-order').classList.remove('hidden');
+}
+
+function updateCartElementsNumber() {
+    totalQuantity++;
+    quantitySpan.innerText = totalQuantity;
+}
+
+function checkNumberZero() {
+    if (totalQuantity === 0) {
+
+        document.querySelector('.empty-cart-image').classList.remove('hidden');
+        document.querySelector('.empty-cart-message').classList.remove('hidden');
+
+        document.querySelector('div.carbon-neutral-delivery').classList.add('hidden');
+        document.querySelector('.confirm-order').classList.add('hidden');
+
+    }
+}
+
+checkNumberZero();
+
+function createControlQuantityButton(e) {
+
+    let quantityControlButton = document.createElement('div');
+    quantityControlButton.className = 'control-quantity';
+
+    let decreaseButton = document.createElement('img');
+    decreaseButton.src = '../../assets/images/icon-decrement-quantity.svg'; 
+
+    let quantityIndicator = document.createElement('span');
+    quantityIndicator.className = 'quantity-indicator';
+    let quantity = 1;
+    quantityIndicator.innerText = quantity;
+
+    let increaseButton = document.createElement('img');
+    increaseButton.src = '../../assets/images/icon-increment-quantity.svg'; 
+
+    quantityControlButton.appendChild(decreaseButton);
+    quantityControlButton.appendChild(quantityIndicator);
+    quantityControlButton.appendChild(increaseButton);
+
+    e.parentNode.appendChild(quantityControlButton);
+
+    increaseButton.addEventListener('click', () => {
+
+        quantity++;
+        quantityIndicator.innerText = quantity;
+
+        updateCartElementsNumber();
+        hideEmptyCartElements();
+
+    });
+
+    decreaseButton.addEventListener('click', () => {
+
+        quantity--;
+        quantityIndicator.innerText = quantity;
+        if (quantity === 0) {
+            decreaseButton.parentNode.remove();
+        }
+
+        totalQuantity--;
+        quantitySpan.innerText = totalQuantity;
+        checkNumberZero();
+
+    });
+}
+
