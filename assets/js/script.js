@@ -4,7 +4,9 @@ async function fetchData() {
 
         const response = await fetch('../../data.json');
         if (response.ok !== false) {
+
             const data = await response.json();
+        
             for (let i in data) {
                 createProduct(data, i);
             }
@@ -17,8 +19,10 @@ async function fetchData() {
                 updateCartElementsNumber();
                 hideEmptyCartElements();
                 createControlQuantityButton(el);
-
+                createProductCart();
+            
             });
+
         });
 
     } catch (error) {
@@ -165,3 +169,32 @@ function createControlQuantityButton(e) {
     });
 }
 
+function createProductCart() {
+
+    let cartOrders = document.querySelector('div.order-list .cart-orders');
+
+    cartOrders.innerHTML += `
+
+        <div class="order">
+            <div class="order-info">
+              <p class="cart-order-name"></p>
+              <div class="quantities-and-price">
+                <p class="cart-quantity"><span class="cart-quantity"></span></p>
+                <p class="cart-unit-price"><span class="cart-unit-price"></span></p>
+                <p class="cart-total-price"><span class="cart-total-price"></span></p>
+              </div>
+            </div>
+            
+            <img src="./assets/images/icon-remove-item.svg" alt="remove item icon" class="remove-order">
+          </div>
+
+    `;
+
+    document.querySelectorAll('img.remove-order').forEach(i => {
+        i.addEventListener('click', () => {
+            i.parentNode.remove();
+        });
+    });
+
+
+}
